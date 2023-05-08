@@ -8,7 +8,7 @@ To build:
 mvn clean package
 ```
 
-Copy the built file to HDFS (TODO: document how) and modify the `app.yaml` accordingly.
+Copy the built file to HDFS (TODO: document how) and modify the `mainApplicationFile` location `app.yaml` accordingly to point at the applicaiton Jar file.
 
 To run:
 ```
