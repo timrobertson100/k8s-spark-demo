@@ -8,7 +8,7 @@ To build:
 mvn clean package
 ```
 
-Copy the built file to we accessible URL and modify the `app.yaml` accordingly.
+Copy the built file to HDFS (TODO: document how) and modify the `app.yaml` accordingly.
 
 To run:
 ```
