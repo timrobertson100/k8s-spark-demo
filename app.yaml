@@ -2,13 +2,13 @@
 apiVersion: spark.stackable.tech/v1alpha1
 kind: SparkApplication
 metadata:
-  name: spark-hive-demo-app
+  name: spark-hive-demo-app-https
 spec:
   version: "1.0"
   sparkImage: docker.stackable.tech/stackable/spark-k8s:3.3.0-stackable0.1.0
   mode: cluster
   # TODO: Replace this with the gbif-hdfs named service as provided in the config maps
-  mainApplicationFile: hdfs://gbif-hdfs-namenode-default-0/tmp/spark-hive-demo-1.0.0-3.3.0.jar
+  mainApplicationFile: https://download.gbif.org/tim/spark-hive-demo-1.0.0-3.3.0.jar
   mainClass: org.gbif.demo.SparkHiveDemoApp
   # Example of providing application arguments
   #  args:
@@ -22,63 +22,61 @@ spec:
     "spark.checkpoint.compress": "true"
     "spark.io.compression.codec": "lz4"
     "spark.rdd.compress": "true"
+    "spark.driver.extraClassPath": "/dependencies/jars/*"
+    "spark.executor.extraClassPath": "/dependencies/jars/*"
+    "spark.driver.extraClassPath": "/etc/hadoop/conf/"
+    "spark.executor.extraClassPath": "/etc/hadoop/conf/"
   # The following config maps are managed in our K8s environment using GBIF naming convention
   volumes:
-    - name: spark-env
-      configMap:
-        name: spark-env
-    - name: hadoop-env
-      configMap:
-        name: gbif-hdfs
-        items:
-          - key: core-site.xml
-            path: core-site.xml
-          - key: hdfs-site.xml
-            path: hdfs-site.xml
-    - name: hive-env
-      configMap:
-        name: gbif-hive-metastore-metastore-default
-        items:
-          - key: hive-site.xml
-            path: hive-site.xml
+  - name: hadoop-env
+    configMap:
+      name: gbif-hdfs
+      items:
+        - key: core-site.xml
+          path: core-site.xml
+        - key: hdfs-site.xml
+          path: hdfs-site.xml
+  - name: hive-env
+    configMap:
+      name: gbif-hive-metastore-metastore-default
+      items:
+        - key: hive-site.xml
+          path: hive-site.xml
   driver:
     resources:
       cpu:
         min: "1"
         max: "4"
       memory:
-        limit: "1Gi"
+        limit: "2Gi"
     # Mount the GBIF-managed volumes providing environment configuration for Spark
     volumeMounts:
-      - name: spark-env
-        mountPath: /stackable/spark/conf
-      - name: hadoop-env
-        mountPath: /etc/hadoop/conf/core-site.xml
-        subPath: core-site.xml
-      - name: hadoop-env
-        mountPath: /etc/hadoop/conf/hdfs-site.xml
-        subPath: hdfs-site.xml
-      - name: hive-env
-        mountPath: /etc/hadoop/conf/hive-site.xml
-        subPath: hive-site.xml
+    - name: hadoop-env
+      mountPath: /etc/hadoop/conf/core-site.xml
+      subPath: core-site.xml
+    - name: hadoop-env
+      mountPath: /etc/hadoop/conf/hdfs-site.xml
+      subPath: hdfs-site.xml
+    - name: hive-env
+      mountPath: /etc/hadoop/conf/hive-site.xml
+      subPath: hive-site.xml
+
   executor:
-    instances: 3
+    instances: 5
     resources:
       cpu:
         min: "1"
-        max: "4"
+        max: "6"
       memory:
-        limit: "1Gi"
+        limit: "10Gi"
     # Mount the GBIF-managed volumes providing environment configuration for Spark
     volumeMounts:
-      - name: spark-env
-        mountPath: /stackable/spark/conf
-      - name: hadoop-env
-        mountPath: /etc/hadoop/conf/core-site.xml
-        subPath: core-site.xml
-      - name: hadoop-env
-        mountPath: /etc/hadoop/conf/hdfs-site.xml
-        subPath: hdfs-site.xml
-      - name: hive-env
-        mountPath: /etc/hadoop/conf/hive-site.xml
-        subPath: hive-site.xml
+    - name: hadoop-env
+      mountPath: /etc/hadoop/conf/core-site.xml
+      subPath: core-site.xml
+    - name: hadoop-env
+      mountPath: /etc/hadoop/conf/hdfs-site.xml
+      subPath: hdfs-site.xml
+    - name: hive-env
+      mountPath: /etc/hadoop/conf/hive-site.xml
+      subPath: hive-site.xml
