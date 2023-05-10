@@ -2,13 +2,15 @@
 apiVersion: spark.stackable.tech/v1alpha1
 kind: SparkApplication
 metadata:
-  name: spark-hive-demo-app-https
+  name: spark-hive-demo-app
 spec:
   version: "1.0"
   sparkImage: docker.stackable.tech/stackable/spark-k8s:3.3.0-stackable0.1.0
   mode: cluster
-  # TODO: Replace this with the gbif-hdfs named service as provided in the config maps
-  mainApplicationFile: https://download.gbif.org/tim/spark-hive-demo-1.0.0-3.3.0.jar
+  # How to point to a jar file in HDFS
+  mainApplicationFile: hdfs://gbif-hdfs/tmp/spark-hive-demo-1.0.0-3.3.0.jar
+  # Example on how to point to a downloadable file on a fileserver
+  # mainApplicationFile: https://download.gbif.org/tim/spark-hive-demo-1.0.0-3.3.0.jar
   mainClass: org.gbif.demo.SparkHiveDemoApp
   # Example of providing application arguments
   #  args:
