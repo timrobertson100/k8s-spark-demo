@@ -40,7 +40,7 @@ spec:
           path: hdfs-site.xml
   - name: hive-env
     configMap:
-      name: gbif-hive-metastore-metastore-default
+      name: gbif-hive-metastore-default
       items:
         - key: hive-site.xml
           path: hive-site.xml
