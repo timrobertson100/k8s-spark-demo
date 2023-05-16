@@ -30,13 +30,13 @@ kubectl apply -f app.yaml
 ## Spark shell demo
 As a proof of concept, a small script has been develop to enable utilizing spark-shell within the Kubernetes cluster. It is a prequirement that the spark-client is deployed in the namespace. The script is called like the following:
 ```
-/util/start-spark-shell-in-k8.sh <kubernetes-master-url> <namespace> <spark-client-pod-name>
+./util/start-spark-shell-in-k8.sh <kubernetes-master-url> <namespace> <spark-client-pod-name>
 ```
 It is possible to pass the size of the executors as well:
 ```
-/util/start-spark-shell-in-k8.sh <kubernetes-master-url> <namespace> <spark-client-pod-name> <number-of-executors> <number-of-cores> <size-of-memory>
+./util/start-spark-shell-in-k8.sh <kubernetes-master-url> <namespace> <spark-client-pod-name> <number-of-executors> <number-of-cores> <size-of-memory>
 ```
 To give realistic example:
 ```
-/util/start-spark-shell-in-k8.sh https://localhost:6443 my-namespace spark-client-43hfcc34fd-8cnxm 4 8 10g
+./util/start-spark-shell-in-k8.sh https://localhost:6443 my-namespace spark-client-43hfcc34fd-8cnxm 4 8 10g
 ```
