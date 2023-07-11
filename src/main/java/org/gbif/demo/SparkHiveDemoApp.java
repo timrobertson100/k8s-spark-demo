@@ -13,26 +13,31 @@
  */
 package org.gbif.demo;
 
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
+import org.gbif.hadoop.compress.d2.D2Codec;
+
+import org.apache.spark.SparkConf;
 import org.apache.spark.sql.SparkSession;
 
 public class SparkHiveDemoApp {
   public static void main(String[] args) {
 
-    String hive = args.length == 3 ? args[0] : "thrift://sc4n2:30420";
-    String source = args.length == 3 ? args[1] : "downloads.dev2_occurrence";
-    String target = args.length == 3 ? args[2] : "downloads.test_dataset_to_delete";
+    String source = args.length == 2 ? args[0] : "downloads.occurrence";
+    String target = args.length == 2 ? args[1] : "downloads.test_dataset_to_delete";
 
     SparkSession spark =
-        SparkSession.builder()
-            .appName("SparkHiveDemoApp")
-            .config("hive.metastore.uris", hive)
-            .enableHiveSupport()
-            .getOrCreate();
+        SparkSession.builder().appName("SparkHiveDemoApp").enableHiveSupport().getOrCreate();
 
-    Dataset<Row> df = spark.sql("SELECT * FROM " + source + " WHERE classKey=212"); // birds
-    System.err.println("Query produced " + df.count() + " records");
-    df.write().saveAsTable(target);
+    // Demonstrate a CTAS registered in Hive, stored as Deflate2 TSVs
+    SparkConf conf = spark.sparkContext().conf();
+    conf.set("hive.exec.compress.output", "true");
+    conf.set("mapred.output.compression.codec", D2Codec.class.getName());
+    spark.sql(
+        "CREATE table "
+            + target
+            + " "
+            + "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t' "
+            + "AS SELECT gbifId, scientificName FROM "
+            + source
+            + " WHERE classKey>200");
   }
 }

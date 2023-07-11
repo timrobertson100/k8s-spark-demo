@@ -12,11 +12,9 @@ spec:
   # Example on how to point to a downloadable file on a fileserver
   # mainApplicationFile: https://download.gbif.org/tim/spark-hive-demo-1.0.0-3.3.0.jar
   mainClass: org.gbif.demo.SparkHiveDemoApp
-  # Example of providing application arguments
-  #  args:
-  #    - "thrift://gbif-hive-metastore-metastore-default-0.gbif-hive-metastore-metastore-default.stack-demo.svc.cluster.local:9083"
-  #    - "mySourceTable"
-  #    - "myTargetTable"
+  args:
+    - "tim.occurrence"
+    - "tim.delme"
   sparkConf:
     "spark.driver.extraJavaOptions": "-XX:+UseConcMarkSweepGC"
     "spark.executor.extraJavaOptions": "-XX:+UseConcMarkSweepGC"
@@ -40,7 +38,7 @@ spec:
           path: hdfs-site.xml
   - name: hive-env
     configMap:
-      name: gbif-hive-metastore-default
+      name: gbif-cli-occurrence-intepretation-hive
       items:
         - key: hive-site.xml
           path: hive-site.xml

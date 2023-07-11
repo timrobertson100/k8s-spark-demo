@@ -14,6 +14,8 @@
     <properties>
         <spark.version>3.3.0</spark.version>
         <scala.binary.version>2.12</scala.binary.version>
+        <!-- install locally from the feature/stackable-hadoop-3-test branch -->
+        <hadoop-compress.version>1.4-H3-SNAPSHOT</hadoop-compress.version>
         <java.version>1.8</java.version>
     </properties>
 
@@ -29,6 +31,11 @@
             <artifactId>spark-sql_${scala.binary.version}</artifactId>
             <version>${spark.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.gbif.hadoop</groupId>
+            <artifactId>hadoop-compress</artifactId>
+            <version>${hadoop-compress.version}</version>
         </dependency>
     </dependencies>
 
