@@ -14,7 +14,7 @@
     <properties>
         <spark.version>3.3.0</spark.version>
         <scala.binary.version>2.12</scala.binary.version>
-        <!-- install locally from the feature/stackable-hadoop-3-test branch -->
+        <!-- In the GBIF snapshot repo, or install locally from the feature/stackable-hadoop-3-test branch -->
         <hadoop-compress.version>1.4-H3-SNAPSHOT</hadoop-compress.version>
         <java.version>1.8</java.version>
     </properties>
