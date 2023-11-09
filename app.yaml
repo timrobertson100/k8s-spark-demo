@@ -5,16 +5,16 @@ metadata:
   name: spark-hive-demo-app
 spec:
   version: "1.0"
-  sparkImage: docker.stackable.tech/stackable/spark-k8s:3.3.0-stackable0.1.0
+  sparkImage: docker.stackable.tech/stackable/spark-k8s:3.4.0-stackable23.7.0
   mode: cluster
   # How to point to a jar file in HDFS
-  mainApplicationFile: hdfs://gbif-hdfs/tmp/spark-hive-demo-1.0.0-3.3.0.jar
+  mainApplicationFile: hdfs://gbif-hdfs/tmp/spark-hive-demo-1.0.0-3.4.0.jar
   # Example on how to point to a downloadable file on a fileserver
   # mainApplicationFile: https://download.gbif.org/tim/spark-hive-demo-1.0.0-3.3.0.jar
   mainClass: org.gbif.demo.SparkHiveDemoApp
   args:
-    - "tim.occurrence"
-    - "tim.delme"
+    - "dev2.occurrence"
+    - "dev2.delme"
   sparkConf:
     "spark.driver.extraJavaOptions": "-XX:+UseConcMarkSweepGC"
     "spark.executor.extraJavaOptions": "-XX:+UseConcMarkSweepGC"
@@ -38,7 +38,7 @@ spec:
           path: hdfs-site.xml
   - name: hive-env
     configMap:
-      name: gbif-cli-occurrence-intepretation-hive
+      name: gbif-hive-metastore-custom
       items:
         - key: hive-site.xml
           path: hive-site.xml
