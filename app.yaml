@@ -18,11 +18,6 @@ spec:
   sparkConf:
     "spark.driver.extraJavaOptions": "-XX:+UseConcMarkSweepGC"
     "spark.executor.extraJavaOptions": "-XX:+UseConcMarkSweepGC"
-    "spark.hadoop.mapreduce.output.fileoutputformat.compress": "true"
-    "spark.hadoop.mapreduce.output.fileoutputformat.compress.codec": "org.gbif.hadoop.compress.d2.D2Codec"
-    "spark.hadoop.mapreduce.output.fileoutputformat.compress.type": "BLOCK"
-    "spark.hadoop.mapreduce.map.output.compress" : "true"
-    "spark.hadoop.mapreduce.map.output.compress.codec": "org.gbif.hadoop.compress.d2.D2Codec"
     "spark.broadcast.compress": "true"
     "spark.checkpoint.compress": "true"
     "spark.io.compression.codec": "lz4"
