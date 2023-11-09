@@ -18,14 +18,17 @@ spec:
   sparkConf:
     "spark.driver.extraJavaOptions": "-XX:+UseConcMarkSweepGC"
     "spark.executor.extraJavaOptions": "-XX:+UseConcMarkSweepGC"
+    "spark.hadoop.mapreduce.output.fileoutputformat.compress": "true"
+    "spark.hadoop.mapreduce.output.fileoutputformat.compress.codec": "org.gbif.hadoop.compress.d2.D2Codec"
+    "spark.hadoop.mapreduce.output.fileoutputformat.compress.type": "BLOCK"
+    "spark.hadoop.mapreduce.map.output.compress" : "true"
+    "spark.hadoop.mapreduce.map.output.compress.codec": "org.gbif.hadoop.compress.d2.D2Codec"
     "spark.broadcast.compress": "true"
     "spark.checkpoint.compress": "true"
     "spark.io.compression.codec": "lz4"
     "spark.rdd.compress": "true"
-    "spark.driver.extraClassPath": "/dependencies/jars/*"
-    "spark.executor.extraClassPath": "/dependencies/jars/*"
-    "spark.driver.extraClassPath": "/etc/hadoop/conf/"
-    "spark.executor.extraClassPath": "/etc/hadoop/conf/"
+    "spark.driver.extraClassPath": "/etc/hadoop/conf/:/stackable/spark/extra-jars/*"
+    "spark.executor.extraClassPath": "/etc/hadoop/conf/:/stackable/spark/extra-jars/*"
   # The following config maps are managed in our K8s environment using GBIF naming convention
   volumes:
   - name: hadoop-env
