@@ -32,7 +32,13 @@ public class SparkDemo {
 
   private static void setupWarehouse(SparkSession spark, String sourceDir) {
     rewriteToWarehouse(spark, sourceDir + "/extended_records", "verbatim", 250);
-    rewriteToWarehouse(spark, sourceDir + "/basic", "basic", 250);
+    rewriteToWarehouse(spark, sourceDir + "/basic", "basic", 100);
+    rewriteToWarehouse(spark, sourceDir + "/grscicoll", "grscicoll", 100);
+    rewriteToWarehouse(spark, sourceDir + "/identifiers", "identifiers", 100);
+    rewriteToWarehouse(spark, sourceDir + "/location", "location", 100);
+    rewriteToWarehouse(spark, sourceDir + "/taxonomy", "taxonomy", 100);
+    rewriteToWarehouse(spark, sourceDir + "/temporal", "temporal", 100);
+    rewriteToWarehouse(spark, sourceDir + "/verbatim", "verbatim", 100);
   }
 
   // Reads, repartition and replace the table in warehouse
@@ -46,8 +52,8 @@ public class SparkDemo {
         .write()
         .format("parquet")
         .mode("overwrite")
-        .bucketBy(10, "id")
-        .sortBy("id")
+        // .bucketBy(10, "id")
+        // .sortBy("id")
         .saveAsTable(tableName);
   }
 }
