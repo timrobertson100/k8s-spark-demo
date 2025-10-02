@@ -55,8 +55,8 @@ spec:
     "spark.executor.extraClassPath": "/etc/hadoop/conf/:/etc/gbif/:/stackable/spark/extra-jars/*:/stackable/spark/jobs/"
     "spark.kubernetes.allocation.batch.size": "20"
     "spark.kubernetes.scheduler.name": "yunikorn"
-    "spark.kubernetes.executor.label.queue": "root.test.downloads"
-    "spark.kubernetes.submit.label.queue": "root.test.downloads"
+    "spark.kubernetes.executor.label.queue": "root.test.pipelines"
+    "spark.kubernetes.submit.label.queue": "root.test.pipelines"
     "spark.kubernetes.driver.ownPersistentVolumeClaim": "true"
     "spark.kubernetes.driver.reusePersistentVolumeClaim": "true"
     "spark.kubernetes.driver.waitToReusePersistentVolumeClaim": "true"
@@ -74,14 +74,15 @@ spec:
     "spark.kubernetes.authenticate.driver.serviceAccountName": "cli-account"
 
     "spark.kubernetes.executor.podNamePrefix": "tim-demo"
-    "spark.sql.shuffle.partitions": "1000"
-    "spark.executor.instances": "20"
-    "spark.executor.cores": "5"
-    "spark.default.parallelism": "1000"
+    "spark.sql.shuffle.partitions": "3000"
+    "spark.executor.instances": "30"
+    "spark.executor.cores": "10"
+    "spark.default.parallelism": "3000"
     "spark.kubernetes.memoryOverheadFactor": "0.25"
     "spark.executor.memoryOverheadFactor": "0.25"
-    "spark.driver.cores": "3"
+    "spark.driver.cores": "4"
     "spark.driver.memoryOverheadFactor": "0.10"
+
   volumes:
     - name: ivy-settings
       configMap:
@@ -119,7 +120,7 @@ spec:
     podOverrides:
       metadata:
         labels:
-          queue: "root.test.downloads"
+          queue: "root.test.pipelines"
     config:
       volumeMounts:
         - name: ivy-settings
@@ -130,7 +131,7 @@ spec:
       metadata:
         annotations:
         labels:
-          queue: "root.test.downloads"
+          queue: "root.test.pipelines"
       spec:
         initContainers:
           - name: job
@@ -187,7 +188,7 @@ spec:
       metadata:
         annotations:
         labels:
-          queue: "root.test.downloads"
+          queue: "root.test.pipelines"
       spec:
         initContainers:
           - name: job
@@ -205,7 +206,7 @@ spec:
           min: "4000m"
           max: "8000m"
         memory:
-          limit: "24Gi"
+          limit: "28Gi"
       logging:
         enableVectorAgent: true
         containers:
