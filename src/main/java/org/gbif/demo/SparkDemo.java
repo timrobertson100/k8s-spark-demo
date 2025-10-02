@@ -13,6 +13,9 @@
  */
 package org.gbif.demo;
 
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
 public class SparkDemo {
@@ -31,23 +34,35 @@ public class SparkDemo {
   }
 
   private static void setupWarehouse(SparkSession spark, String sourceDir) {
-    rewriteToWarehouse(spark, sourceDir + "/extended_records", "verbatim", 250);
-    rewriteToWarehouse(spark, sourceDir + "/basic", "basic", 100);
-    rewriteToWarehouse(spark, sourceDir + "/grscicoll", "grscicoll", 100);
-    rewriteToWarehouse(spark, sourceDir + "/identifiers", "identifiers", 100);
-    rewriteToWarehouse(spark, sourceDir + "/location", "location", 100);
-    rewriteToWarehouse(spark, sourceDir + "/taxonomy", "taxonomy", 100);
-    rewriteToWarehouse(spark, sourceDir + "/temporal", "temporal", 100);
-    rewriteToWarehouse(spark, sourceDir + "/verbatim", "verbatim", 100);
+    rewriteToWarehouse(spark, sourceDir + "/extended_records", "verbatim", 250, false);
+    rewriteToWarehouse(spark, sourceDir + "/basic", "basic", 100, true);
+    rewriteToWarehouse(spark, sourceDir + "/grscicoll", "grscicoll", 100, true);
+    rewriteToWarehouse(spark, sourceDir + "/identifiers", "identifiers", 100, true);
+    rewriteToWarehouse(spark, sourceDir + "/location", "location", 100, true);
+    rewriteToWarehouse(spark, sourceDir + "/taxonomy", "taxonomy", 100, true);
+    rewriteToWarehouse(spark, sourceDir + "/temporal", "temporal", 100, true);
+    rewriteToWarehouse(spark, sourceDir + "/verbatim", "verbatim", 100, true);
   }
 
   // Reads, repartition and replace the table in warehouse
   private static void rewriteToWarehouse(
-      SparkSession spark, String sourceDir, String tableName, int partitionCount) {
+      SparkSession spark,
+      String sourceDir,
+      String tableName,
+      int partitionCount,
+      boolean expandToKVP) {
     spark.sql(String.format("DROP TABLE IF EXISTS %s", tableName));
-    spark
-        .read()
-        .parquet(sourceDir)
+
+    Dataset<Row> input =
+        expandToKVP
+            ? spark
+                .read()
+                .parquet(sourceDir)
+                .as(Encoders.tuple(Encoders.STRING(), Encoders.STRING()))
+                .toDF("id", tableName)
+            : spark.read().parquet(sourceDir);
+
+    input
         .repartition(partitionCount)
         .write()
         .format("parquet")
