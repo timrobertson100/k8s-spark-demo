@@ -1,80 +1,238 @@
----
 apiVersion: spark.stackable.tech/v1alpha1
 kind: SparkApplication
 metadata:
-  name: spark-hive-demo-app
+  name: tim-spark-test
 spec:
-  version: "1.0"
-  sparkImage: docker.stackable.tech/stackable/spark-k8s:3.4.0-stackable23.7.0
+  image: docker.gbif.org/ingest-gbif-spark:3.2.7-SNAPSHOT
+  sparkImage:
+    productVersion: 3.5.1
+    stackableVersion: 24.7.0
+    repo: stackable-docker.gbif.org/stackable
   mode: cluster
-  # How to point to a jar file in HDFS
-  mainApplicationFile: hdfs://gbif-hdfs/tmp/spark-hive-demo-1.0.0-3.4.0.jar
-  # Example on how to point to a downloadable file on a fileserver
-  # mainApplicationFile: https://download.gbif.org/tim/spark-hive-demo-1.0.0-3.3.0.jar
-  mainClass: org.gbif.demo.SparkHiveDemoApp
+  mainApplicationFile: hdfs://gbif-hdfs/user/tim/spark-demo-1.0.0-3.5.6.jar
+  mainClass: org.gbif.demo.SparkDemo
+  vectorAggregatorConfigMapName: gbif-vector-aggregator-discovery
+  s3connection:
+    inline:
+      host: minio.minio-system.svc.cluster.local
+      port: 9000
+      accessStyle: Path
+      credentials:
+        secretClass: gbif-spark-history-test-credentials-class
+  logFileDirectory:
+    s3:
+      prefix: /
+      bucket:
+        inline:
+          bucketName: spark-history-test-bucket
   args:
-    - "dev2.occurrence"
-    - "dev2.delme"
+    - "/data/ingest_spark/50c9509d-22c7-4a22-a47d-8c48425ef4a7/236"
+    - "/user/tim/spark-demo"
   sparkConf:
-    "spark.driver.extraJavaOptions": "-XX:+UseConcMarkSweepGC"
-    "spark.executor.extraJavaOptions": "-XX:+UseConcMarkSweepGC"
+    "spark.driver.extraJavaOptions": "-XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=35"
+    "spark.executor.extraJavaOptions": "-XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=35 -XX:ConcGCThread=20"
+    "spark.storage.decommission.shuffleBlocks.enabled": "false"
+    "spark.storage.decommission.rddBlocks.enabled": "false"
+    "spark.shuffle.readHostLocalDisk": "false"
+    "spark.shuffle.service.enabled": "false"
+    "spark.serializer": "org.apache.spark.serializer.KryoSerializer"
+    "spark.sql.adaptive.localShuffleReader.enabled": "false"
+    "spark.sql.adaptive.enabled": "true"
+    "spark.sql.adaptive.skewJoin.enabled": "true"
+    "spark.files.fetchTimeout": "300s"
+    "spark.jars.ivy": "/tmp"
+    "spark.jars.ivySettings": "/tmp/ivy-settings.xml"
     "spark.broadcast.compress": "true"
     "spark.checkpoint.compress": "true"
-    "spark.io.compression.codec": "lz4"
+    "spark.executor.heartbeatInterval": "30s"
+    "spark.network.timeout": "900s"
+    "spark.io.compression.codec": "snappy"
     "spark.rdd.compress": "true"
-    "spark.driver.extraClassPath": "/etc/hadoop/conf/:/stackable/spark/extra-jars/*"
-    "spark.executor.extraClassPath": "/etc/hadoop/conf/:/stackable/spark/extra-jars/*"
-  # The following config maps are managed in our K8s environment using GBIF naming convention
-  volumes:
-  - name: hadoop-env
-    configMap:
-      name: gbif-hdfs
-      items:
-        - key: core-site.xml
-          path: core-site.xml
-        - key: hdfs-site.xml
-          path: hdfs-site.xml
-  - name: hive-env
-    configMap:
-      name: gbif-hive-metastore-custom
-      items:
-        - key: hive-site.xml
-          path: hive-site.xml
-  driver:
-    resources:
-      cpu:
-        min: "1"
-        max: "4"
-      memory:
-        limit: "2Gi"
-    # Mount the GBIF-managed volumes providing environment configuration for Spark
-    volumeMounts:
-    - name: hadoop-env
-      mountPath: /etc/hadoop/conf/core-site.xml
-      subPath: core-site.xml
-    - name: hadoop-env
-      mountPath: /etc/hadoop/conf/hdfs-site.xml
-      subPath: hdfs-site.xml
-    - name: hive-env
-      mountPath: /etc/hadoop/conf/hive-site.xml
-      subPath: hive-site.xml
+    "spark.sql.hive.dropTableInPurge": "true"
+    "spark.shuffle.io.maxRetries": "5"
+    "spark.shuffle.io.retryWait": "300s"
+    "spark.driver.extraClassPath": "/etc/hadoop/conf/:/etc/gbif/:/stackable/spark/extra-jars/*:/stackable/spark/jobs/"
+    "spark.executor.extraClassPath": "/etc/hadoop/conf/:/etc/gbif/:/stackable/spark/extra-jars/*:/stackable/spark/jobs/"
+    "spark.kubernetes.allocation.batch.size": "20"
+    "spark.kubernetes.scheduler.name": "yunikorn"
+    "spark.kubernetes.executor.label.queue": "root.test.downloads"
+    "spark.kubernetes.submit.label.queue": "root.test.downloads"
+    "spark.kubernetes.driver.ownPersistentVolumeClaim": "true"
+    "spark.kubernetes.driver.reusePersistentVolumeClaim": "true"
+    "spark.kubernetes.driver.waitToReusePersistentVolumeClaim": "true"
+    "spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.claimName": "OnDemand"
+    "spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.storageClass": "local-path-delete"
+    "spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.sizeLimit": "28Gi"
+    "spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.mount.readOnly": "false"
+    "spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.mount.path": "/data/spark-1/executor"
+    "spark.kubernetes.driver.volumes.persistentVolumeClaim.checkpoint.options.claimName": "OnDemand"
+    "spark.kubernetes.driver.volumes.persistentVolumeClaim.checkpoint.options.storageClass": "local-path-delete"
+    "spark.kubernetes.driver.volumes.persistentVolumeClaim.checkpoint.mount.readOnly": "false"
+    "spark.kubernetes.driver.volumes.persistentVolumeClaim.checkpoint.mount.path": "/data"
+    "spark.kubernetes.driver.volumes.persistentVolumeClaim.checkpoint.options.sizeLimit": "6Gi"
+    "spark.local.dir": "/data/spark-1/executor"
+    "spark.kubernetes.authenticate.driver.serviceAccountName": "cli-account"
 
-  executor:
-    instances: 5
-    resources:
-      cpu:
-        min: "1"
-        max: "6"
-      memory:
-        limit: "10Gi"
-    # Mount the GBIF-managed volumes providing environment configuration for Spark
-    volumeMounts:
-    - name: hadoop-env
-      mountPath: /etc/hadoop/conf/core-site.xml
-      subPath: core-site.xml
-    - name: hadoop-env
-      mountPath: /etc/hadoop/conf/hdfs-site.xml
-      subPath: hdfs-site.xml
+    "spark.kubernetes.executor.podNamePrefix": "tim-demo"
+    "spark.sql.shuffle.partitions": "1000"
+    "spark.executor.instances": "20"
+    "spark.executor.cores": "5"
+    "spark.default.parallelism": "1000"
+    "spark.kubernetes.memoryOverheadFactor": "0.25"
+    "spark.executor.memoryOverheadFactor": "0.25"
+    "spark.driver.cores": "3"
+    "spark.driver.memoryOverheadFactor": "0.10"
+  volumes:
+    - name: ivy-settings
+      configMap:
+        name: gbif-airflow-ivy
+        items:
+          - key: ivy-settings.xml
+            path: ivy-settings.xml
+    - name: hdfs-env
+      configMap:
+        name: gbif-hdfs
+        items:
+          - key: core-site.xml
+            path: core-site.xml
+          - key: hdfs-site.xml
+            path: hdfs-site.xml
     - name: hive-env
-      mountPath: /etc/hadoop/conf/hive-site.xml
-      subPath: hive-site.xml
+      configMap:
+        name: gbif-hive-metastore-custom
+        items:
+          - key: hive-site.xml
+            path: hive-site.xml
+    - name: hbase-env
+      configMap:
+        name: gbif-hbase
+        items:
+          - key: hbase-site.xml
+            path: hbase-site.xml
+    - name: pipelines-spark-yaml
+      configMap:
+        name: pipelines-spark-yaml
+        items:
+          - key: pipelines-spark.yaml
+            path: pipelines-spark.yaml
+  job:
+    podOverrides:
+      metadata:
+        labels:
+          queue: "root.test.downloads"
+    config:
+      volumeMounts:
+        - name: ivy-settings
+          mountPath: /tmp/ivy-settings.xml
+          subPath: ivy-settings.xml
+  driver:
+    podOverrides:
+      metadata:
+        annotations:
+        labels:
+          queue: "root.test.downloads"
+      spec:
+        initContainers:
+          - name: job
+            imagePullPolicy: Always
+            resources:
+              limits:
+                cpu: 500m
+                memory: 256Mi
+              requests:
+                cpu: 250m
+                memory: 128Mi
+    config:
+      resources:
+        cpu:
+          min: "2000m"
+          max: "8000m"
+        memory:
+          limit: "4Gi"
+      logging:
+        enableVectorAgent: true
+        containers:
+          vector:
+            file:
+              level: "WARN"
+          spark:
+            console:
+              level: "INFO"
+            file:
+              level: "INFO"
+            loggers:
+              ROOT:
+                level: "INFO"
+      volumeMounts:
+        - name: ivy-settings
+          mountPath: /tmp/ivy-settings.xml
+          subPath: ivy-settings.xml
+        - name: hdfs-env
+          mountPath: /etc/hadoop/conf/core-site.xml
+          subPath: core-site.xml
+        - name: hdfs-env
+          mountPath: /etc/hadoop/conf/hdfs-site.xml
+          subPath: hdfs-site.xml
+        - name: hive-env
+          mountPath: /etc/hadoop/conf/hive-site.xml
+          subPath: hive-site.xml
+        - name: hbase-env
+          mountPath: /etc/hadoop/conf/hbase-site.xml
+          subPath: hbase-site.xml
+        - name: pipelines-spark-yaml
+          mountPath: /tmp/pipelines-spark.yaml
+          subPath: pipelines-spark.yaml
+  executor:
+    podOverrides:
+      metadata:
+        annotations:
+        labels:
+          queue: "root.test.downloads"
+      spec:
+        initContainers:
+          - name: job
+            imagePullPolicy: Always
+            resources:
+              limits:
+                cpu: 500m
+                memory: 256Mi
+              requests:
+                cpu: 250m
+                memory: 128Mi
+    config:
+      resources:
+        cpu:
+          min: "4000m"
+          max: "8000m"
+        memory:
+          limit: "24Gi"
+      logging:
+        enableVectorAgent: true
+        containers:
+          vector:
+            file:
+              level: "WARN"
+          spark:
+            console:
+              level: "INFO"
+            file:
+              level: "INFO"
+            loggers:
+              ROOT:
+                level: "INFO"
+      volumeMounts:
+        - name: ivy-settings
+          mountPath: /tmp/ivy-settings.xml
+          subPath: ivy-settings.xml
+        - name: hdfs-env
+          mountPath: /etc/hadoop/conf/core-site.xml
+          subPath: core-site.xml
+        - name: hdfs-env
+          mountPath: /etc/hadoop/conf/hdfs-site.xml
+          subPath: hdfs-site.xml
+        - name: hive-env
+          mountPath: /etc/hadoop/conf/hive-site.xml
+          subPath: hive-site.xml
+        - name: hbase-env
+          mountPath: /etc/hadoop/conf/hbase-site.xml
+          subPath: hbase-site.xml

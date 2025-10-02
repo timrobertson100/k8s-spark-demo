@@ -2,13 +2,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.gbif.demo</groupId>
-    <artifactId>spark-hive-demo</artifactId>
+    <artifactId>spark-demo</artifactId>
     <version>1.0.0</version>
 
     <parent>
         <groupId>org.gbif</groupId>
         <artifactId>motherpom</artifactId>
-        <version>56</version>
+        <version>59</version>
     </parent>
 
     <repositories>
@@ -31,11 +31,9 @@
     </repositories>
 
     <properties>
-        <spark.version>3.4.0</spark.version>
-        <scala.binary.version>2.12</scala.binary.version>
-        <!-- In the GBIF snapshot repo, or install locally from the feature/stackable-hadoop-3-test branch -->
-        <hadoop-compress.version>1.4-H3-SNAPSHOT</hadoop-compress.version>
-        <java.version>1.8</java.version>
+        <spark.version>3.5.6</spark.version>
+        <scala.binary.version>2.13</scala.binary.version>
+        <java.version>17</java.version>
     </properties>
 
     <dependencies>
@@ -50,11 +48,6 @@
             <artifactId>spark-sql_${scala.binary.version}</artifactId>
             <version>${spark.version}</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.gbif.hadoop</groupId>
-            <artifactId>hadoop-compress</artifactId>
-            <version>${hadoop-compress.version}</version>
         </dependency>
     </dependencies>
 
@@ -84,7 +77,7 @@
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.7</version>
+                            <version>1.15.0</version>
                         </googleJavaFormat>
                     </java>
                 </configuration>
@@ -101,9 +94,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <!-- TODO: Decide on a decent Java version -->
-                    <source>8</source>
-                    <target>8</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
        </plugins>
